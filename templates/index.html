@@ -1,0 +1,169 @@
+<html>
+{% load staticfiles %}
+<head>
+<link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+<script type="text/javascript" src="{% static 'js/angular.min.js' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+</head>
+<title>BLRdroid</title>
+<body ng-app="myApp" ng-controller="newCtrl" ng-init="init()">
+<style>
+	.thumb
+	{
+		background: #dee0e0;
+		width:170px;
+		height:140px; /* Safari */
+    	transition: background 0.6s;
+    	transition: height 0.6s;
+    	cursor: pointer;
+	}
+	.thumb:hover
+	{
+		background: #ffffff;
+		height:160;
+		cursor: pointer;
+	}
+	.thumbhover
+	{
+		background: #ffffff;
+		height:160;
+		width:170px;
+	}
+	.voted
+	{
+		background: #e0e5e5;
+		width:100%;
+		height:50px;
+		padding-top: 10px;
+		padding-left: 10px;
+		margin-top: 10px;
+		border:solid 1px #dee0e0;
+		color: #919696;
+	}
+</style>
+<div style="background: #ffffff; border-top: 1px solid #ff0000;margin-top: 5px"width=100%>
+<img src="{%static 'img/icon.jpeg' %}">
+<div class="btn-group" role="group" style="padding-left: 1050px" aria-label="...">
+  <input type="button" ng-click="redirect()" class="btn btn-default" value="Finish">
+</div>
+</div>
+<div class="voted">Voted : {$voted$}</div>
+<div class="container">
+{%csrf_token %}
+	<div class="row">
+		<div class="col-md-4">
+			<br><br><br>
+			<div id="recipebook" class="thumb" ng-click="vote('recipebook','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed.webp' %}" width=100 height=100>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<br><br><br>
+			<div class="thumb" id="signeasy" ng-click="vote('signeasy','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed (1).webp' %}" width=100 height=100>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<br><br><br>
+			<div class="thumb" id="helpchat" ng-click="vote('helpchat','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed (2).webp' %}" width=100 height=100>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+			<br><br><br>
+			<div class="thumb" id="volt" ng-click="vote('volt','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed (3).webp' %}" width=100 height=100>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<br><br><br>
+			<div class="thumb" id="strike" ng-click="vote('strike','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed (4).webp' %}" width=100 height=100>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<br><br><br>
+			<div class="thumb" id="buyhatke" ng-click="vote('buyhatke','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed (5).webp' %}" width=100 height=100>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+			<br><br><br>
+			<div class="thumb" id="cleartax" ng-click="vote('cleartax','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed (6).webp' %}" width=100 height=100>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<br><br><br>
+			<div class="thumb" id="rapido" ng-click="vote('rapido','{{uid}}')">
+				<img style="margin-left: 35px;margin-top: 20px" src="{% static 'img/unnamed (7).webp' %}" width=100 height=100>
+			</div>
+		</div>
+	</div>
+</div>
+<br><br><br>
+</body>
+
+<script>
+	var app=angular.module('myApp',[]);
+	app.controller('newCtrl',function($scope, $http, $interval,$timeout) {
+		$scope.init=function()
+		{
+			$scope.count=0;
+			$scope.voted="";
+
+		}
+
+		$scope.vote=function(app_name,uid)
+		{
+			if($scope.count<3)
+			{
+				document.getElementById(app_name).className = 'thumbhover';
+				console.log(app_name,uid);
+				$scope.count=$scope.count+1;
+				$http({
+					    method: 'POST',
+					    url: '/vote/',
+					    data: {
+					           app_name : app_name,
+					           uid:uid,
+					             csrfmiddlewaretoken: '{{ csrf_token }}',
+					        },
+					    headers: {'Content-Type': 'application/json'}
+					});
+				$scope.voted=$scope.voted+"\t"+app_name	
+			}
+		}
+		$scope.redirect=function(){
+			if($scope.count>=3)
+			{
+				window.location.assign("/");
+			}
+			else
+			{
+				$scope.errors="Please select "+(3-$scope.count)+" more";
+				alert($scope.errors);
+			}
+
+		}
+
+
+	}
+		);
+var my_app = angular.module('myApp').config(function($interpolateProvider) {
+    $interpolateProvider.startSymbol('{$');
+    $interpolateProvider.endSymbol('$}');
+});
+
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+}]);
+
+</script>
+</html>
